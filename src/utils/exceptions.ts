@@ -33,3 +33,9 @@ export class InvalidUserIdException extends BadRequestException {
     super('Invalid userId');
   }
 }
+
+export class TrackNotFoundException extends NotFoundException {
+  constructor() {
+    super('Track not found');
+  }
+}
