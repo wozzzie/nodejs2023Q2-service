@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 
 export class LoginAndPasswordRequiredException extends BadRequestException {
@@ -37,6 +38,24 @@ export class InvalidUserIdException extends BadRequestException {
 export class TrackNotFoundException extends NotFoundException {
   constructor() {
     super('Track not found');
+  }
+}
+
+export class TrackNotCorrespondExeption extends UnprocessableEntityException {
+  constructor() {
+    super(`The track does not correspond`);
+  }
+}
+
+export class AlbumNotCorrespondExeption extends UnprocessableEntityException {
+  constructor() {
+    super(`The album does not correspond`);
+  }
+}
+
+export class ArtistNotCorrespondExeption extends UnprocessableEntityException {
+  constructor() {
+    super(`The artist does not correspond`);
   }
 }
 

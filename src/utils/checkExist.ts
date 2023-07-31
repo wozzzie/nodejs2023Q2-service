@@ -1,7 +1,10 @@
 import { User } from 'src/types/usersInterface';
 import {
+  AlbumNotCorrespondExeption,
   AlbumNotFoundException,
+  ArtistNotCorrespondExeption,
   ArtistNotFoundException,
+  TrackNotCorrespondExeption,
   TrackNotFoundException,
   UserNotFoundException,
 } from './exceptions';
@@ -21,6 +24,24 @@ const checkTrackExist = (track?: Track): void => {
   }
 };
 
+const checkTrackCorrespond = (track?: Track): void => {
+  if (!track) {
+    throw new TrackNotCorrespondExeption();
+  }
+};
+
+const checkAlbumCorrespond = (album?: Album): void => {
+  if (!album) {
+    throw new AlbumNotCorrespondExeption();
+  }
+};
+
+const checkArtistCorrespond = (artist?: Artist): void => {
+  if (!artist) {
+    throw new ArtistNotCorrespondExeption();
+  }
+};
+
 const checkArtistExist = (artist?: Artist): void => {
   if (!artist) {
     throw new ArtistNotFoundException();
@@ -33,4 +54,24 @@ const checkAlbumExist = (album?: Album): void => {
   }
 };
 
-export { checkUserExist, checkTrackExist, checkArtistExist, checkAlbumExist };
+const checkFavExist = (entity: Artist | Album | Track): void => {
+  if (!entity) {
+    if (entity === (entity as Artist)) {
+      throw new ArtistNotFoundException();
+    } else if (entity === (entity as Album)) {
+      throw new AlbumNotFoundException();
+    } else if (entity === (entity as Track)) {
+      throw new TrackNotFoundException();
+    }
+  }
+};
+export {
+  checkUserExist,
+  checkTrackExist,
+  checkArtistExist,
+  checkAlbumExist,
+  checkTrackCorrespond,
+  checkFavExist,
+  checkAlbumCorrespond,
+  checkArtistCorrespond,
+};
