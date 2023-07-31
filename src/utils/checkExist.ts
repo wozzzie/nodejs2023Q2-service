@@ -54,24 +54,12 @@ const checkAlbumExist = (album?: Album): void => {
   }
 };
 
-const checkFavExist = (entity: Artist | Album | Track): void => {
-  if (!entity) {
-    if (entity === (entity as Artist)) {
-      throw new ArtistNotFoundException();
-    } else if (entity === (entity as Album)) {
-      throw new AlbumNotFoundException();
-    } else if (entity === (entity as Track)) {
-      throw new TrackNotFoundException();
-    }
-  }
-};
 export {
   checkUserExist,
   checkTrackExist,
   checkArtistExist,
   checkAlbumExist,
   checkTrackCorrespond,
-  checkFavExist,
   checkAlbumCorrespond,
   checkArtistCorrespond,
 };

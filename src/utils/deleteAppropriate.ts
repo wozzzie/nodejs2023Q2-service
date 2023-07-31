@@ -29,16 +29,16 @@ const deleteAppropriateAlbum = (album: Album): void => {
 };
 
 const deleteAppropriateFav = (
-  type: Artist | Album | Track,
+  type: 'Artist' | 'Album' | 'Track',
   entity: Artist | Album | Track,
 ) => {
-  if (type === (type as Artist)) {
+  if (type === 'Artist') {
     const index = FAVORITES_DB.artists.indexOf(entity as Artist);
     FAVORITES_DB.artists.splice(index, 1);
-  } else if (type === (type as Album)) {
+  } else if (type === 'Album') {
     const index = FAVORITES_DB.albums.indexOf(entity as Album);
     FAVORITES_DB.albums.splice(index, 1);
-  } else if (type === (type as Track)) {
+  } else if (type === 'Track') {
     const index = FAVORITES_DB.tracks.indexOf(entity as Track);
     FAVORITES_DB.tracks.splice(index, 1);
   } else {

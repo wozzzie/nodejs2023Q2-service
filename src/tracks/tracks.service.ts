@@ -7,7 +7,10 @@ import { UpdateTrackDto } from './dto/updateTrackDto.dto';
 import getValidUuid from 'src/utils/checkValidation';
 import { checkTrackExist } from 'src/utils/checkExist';
 import { findTrack } from 'src/utils/checkAppropriate';
-import { deleteAppropriateTrack } from 'src/utils/deleteAppropriate';
+import {
+  deleteAppropriateFav,
+  deleteAppropriateTrack,
+} from 'src/utils/deleteAppropriate';
 
 @Injectable()
 export class TracksService {
@@ -85,6 +88,6 @@ export class TracksService {
     const track = findTrack(id);
     checkTrackExist(track);
     deleteAppropriateTrack(track);
-    // this.favoritesService.removeTrackFromFavorites(id);
+    deleteAppropriateFav('Track', track as Track);
   }
 }

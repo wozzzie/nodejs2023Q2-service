@@ -5,7 +5,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { findAlbum } from 'src/utils/checkAppropriate';
 import { checkAlbumExist } from 'src/utils/checkExist';
 import { CreateAlbumsDto } from './dto/createAlbumsDto.dto';
-import { deleteAppropriateAlbum } from 'src/utils/deleteAppropriate';
+import {
+  deleteAppropriateAlbum,
+  deleteAppropriateFav,
+} from 'src/utils/deleteAppropriate';
 import { UpdateAlbumsDto } from './dto/updateAlbumsDto.dto';
 import { Album } from 'src/types/albumsInterface';
 import TRACKS_DB from 'src/db/tracks.db';
@@ -77,7 +80,8 @@ export class AlbumsService {
         track.albumId = null;
       }
     });
-
     deleteAppropriateAlbum(album);
+
+    deleteAppropriateFav('Album', album as Album);
   }
 }

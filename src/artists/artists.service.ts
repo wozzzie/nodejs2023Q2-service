@@ -6,7 +6,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { findArtist } from 'src/utils/checkAppropriate';
 import { checkArtistExist } from 'src/utils/checkExist';
 import { CreateArtistDto } from './dto/createArtistDto.dto';
-import { deleteAppropriateArtist } from 'src/utils/deleteAppropriate';
+import {
+  deleteAppropriateArtist,
+  deleteAppropriateFav,
+} from 'src/utils/deleteAppropriate';
 import { UpdateArtistDto } from './dto/updateArtistDto.dto';
 import TRACKS_DB from 'src/db/tracks.db';
 import { Track } from 'src/types/tracksInterface';
@@ -86,6 +89,6 @@ export class ArtistsService {
       }
     });
     deleteAppropriateArtist(artist);
-    // this.favoritesService.removeTrackFromFavorites(id);
+    deleteAppropriateFav('Artist', artist as Artist);
   }
 }

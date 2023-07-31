@@ -1,4 +1,14 @@
+import { IsString, IsBoolean, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
 export class UpdateArtistDto {
-  name?: string;
-  grammy?: boolean;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsBoolean()
+  grammy: boolean;
 }

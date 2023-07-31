@@ -11,7 +11,6 @@ import {
   checkAlbumExist,
   checkArtistCorrespond,
   checkArtistExist,
-  checkFavExist,
   checkTrackCorrespond,
   checkTrackExist,
 } from 'src/utils/checkExist';
@@ -41,9 +40,8 @@ export class FavoritesService {
     const track = findTrack(id);
     checkTrackExist(track);
 
-    const favTrack = findInFavs(id, track as Track);
-    checkFavExist(favTrack as Track);
-    deleteAppropriateFav(track as Track, favTrack);
+    const favTrack = findInFavs(id, 'Track') as Track;
+    deleteAppropriateFav('Track', favTrack);
   }
 
   addFavAlbum(id: string): void {
@@ -58,9 +56,8 @@ export class FavoritesService {
     const album = findAlbum(id);
     checkAlbumExist(album);
 
-    const favAlbum = findInFavs(id, album as Album);
-    checkFavExist(favAlbum as Album);
-    deleteAppropriateFav(album as Album, favAlbum);
+    const favAlbum = findInFavs(id, 'Album') as Album;
+    deleteAppropriateFav('Album', favAlbum);
   }
 
   addFavArtist(id: string): void {
@@ -75,8 +72,7 @@ export class FavoritesService {
     const artist = findArtist(id);
     checkArtistExist(artist);
 
-    const favArtist = findInFavs(id, artist as Artist);
-    checkFavExist(favArtist as Artist);
-    deleteAppropriateFav(artist as Artist, favArtist);
+    const favArtist = findInFavs(id, 'Artist') as Artist;
+    deleteAppropriateFav('Artist', favArtist);
   }
 }

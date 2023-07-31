@@ -1,5 +1,12 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class UpdateAlbumsDto {
-  name?: string;
-  year?: number;
-  artistId?: string;
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  year: number;
+
+  @ApiProperty()
+  artistId: string;
 }

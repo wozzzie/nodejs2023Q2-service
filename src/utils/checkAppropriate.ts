@@ -24,16 +24,13 @@ const findAlbum = (id: string): Album => {
   return ALBUMS_DB.find((album: Album) => album.id === id);
 };
 
-const findInFavs = (
-  id: string,
-  type: Artist | Album | Track,
-): Artist | Album | Track => {
-  if (type === (type as Artist)) {
-    return FAVORITES_DB.artists.find((entity) => entity.id === id) as Artist;
-  } else if (type === (type as Album)) {
-    return FAVORITES_DB.albums.find((entity) => entity.id === id) as Album;
-  } else if (type === (type as Track)) {
-    return FAVORITES_DB.tracks.find((entity) => entity.id === id) as Track;
+const findInFavs = (id: string, type: 'Artist' | 'Album' | 'Track') => {
+  if (type === 'Artist') {
+    return FAVORITES_DB.artists.find((entity) => entity.id === id);
+  } else if (type === 'Album') {
+    return FAVORITES_DB.albums.find((entity) => entity.id === id);
+  } else if (type === 'Track') {
+    return FAVORITES_DB.tracks.find((entity) => entity.id === id);
   } else {
     throw new Error('Invalid type');
   }
