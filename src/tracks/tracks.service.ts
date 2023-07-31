@@ -85,5 +85,6 @@ export class TracksService {
     const track = findTrack(id);
     checkTrackExist(track);
     deleteAppropriateTrack(track);
+    // this.favoritesService.removeTrackFromFavorites(id);
   }
 }

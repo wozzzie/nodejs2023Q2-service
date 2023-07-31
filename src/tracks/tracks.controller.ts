@@ -39,7 +39,7 @@ export class TracksController {
   }
 
   @Put(':trackId')
-  async updateUserPassword(
+  async updateTrack(
     @Param('trackId') trackId: string,
     @Body() updateTrackDto: UpdateTrackDto,
   ): Promise<Track> {
@@ -52,7 +52,7 @@ export class TracksController {
 
   @Delete(':trackId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteTracks(@Param('trackId') trackId: string): Promise<void> {
+  async deleteTrack(@Param('trackId') trackId: string): Promise<void> {
     const deletedTrack = this.tracksService.deleteTrack(trackId);
     return deletedTrack;
   }

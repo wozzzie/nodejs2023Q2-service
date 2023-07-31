@@ -1,6 +1,11 @@
 import { User } from 'src/types/usersInterface';
-import { TrackNotFoundException, UserNotFoundException } from './exceptions';
+import {
+  ArtistNotFoundException,
+  TrackNotFoundException,
+  UserNotFoundException,
+} from './exceptions';
 import { Track } from 'src/types/tracksInterface';
+import { Artist } from 'src/types/artistsInterface';
 
 const checkUserExist = (user?: User): void => {
   if (!user) {
@@ -14,4 +19,10 @@ const checkTrackExist = (track?: Track): void => {
   }
 };
 
-export { checkUserExist, checkTrackExist };
+const checkArtistExist = (artist?: Artist): void => {
+  if (!artist) {
+    throw new ArtistNotFoundException();
+  }
+};
+
+export { checkUserExist, checkTrackExist, checkArtistExist };
