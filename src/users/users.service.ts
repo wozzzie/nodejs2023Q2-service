@@ -3,14 +3,16 @@ import {
   LoginAndPasswordRequiredException,
   InvalidOldPasswordException,
   InvalidDataException,
-  UserNotFoundException,
-  InvalidUserIdException,
 } from '../utils/exceptions';
-import { v4 as uuidv4, validate as isUuidValid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './dto/createUserDto.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto.dto';
 import { User } from '../types/usersInterface';
 import USERS_DB from 'src/db/users.db';
+import getValidUuid from 'src/utils/checkValidation';
+import { checkUserExist } from 'src/utils/checkExist';
+import { findUser } from 'src/utils/checkAppropriate';
+import { deleteAppropriateUser } from 'src/utils/deleteAppropriate';
 
 @Injectable()
 export class UsersService {
@@ -19,22 +21,6 @@ export class UsersService {
     ...userWithoutPassword
   }: User): Omit<User, 'password'> {
     return userWithoutPassword;
-  }
-
-  public getValidUuid(id: string): void {
-    if (!isUuidValid(id)) {
-      throw new InvalidUserIdException();
-    }
-  }
-
-  public getUserExist(user: User): void {
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-  }
-
-  public findUser(id: string): User {
-    return USERS_DB.find((user) => user.id === id);
   }
 
   private checkLoginPassword(login: string, password: string): void {
@@ -54,9 +40,9 @@ export class UsersService {
   }
 
   getUserById(id: string): Omit<User, 'password'> {
-    this.getValidUuid(id);
-    const user = this.findUser(id);
-    this.getUserExist(user);
+    getValidUuid(id);
+    const user = findUser(id);
+    checkUserExist(user);
 
     return this.setUserWithoutPassword(user);
   }
@@ -85,12 +71,12 @@ export class UsersService {
   ): Omit<User, 'password'> {
     const { oldPassword, newPassword } = updatePasswordDto;
 
-    this.getValidUuid(id);
+    getValidUuid(id);
 
     this.checkOldNewPassword(oldPassword, newPassword);
 
-    const user = this.findUser(id);
-    this.getUserExist(user);
+    const user = findUser(id);
+    checkUserExist(user);
 
     if (user.password !== oldPassword) {
       throw new InvalidOldPasswordException();
@@ -107,12 +93,11 @@ export class UsersService {
   }
 
   deleteUser(id: string) {
-    const user = this.findUser(id);
+    const user = findUser(id);
 
-    this.getValidUuid(id);
-    this.getUserExist(user);
+    getValidUuid(id);
+    checkUserExist(user);
 
-    const index = USERS_DB.indexOf(user);
-    USERS_DB.splice(index, 1);
+    deleteAppropriateUser(user);
   }
 }
