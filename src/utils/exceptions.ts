@@ -39,3 +39,9 @@ export class TrackNotFoundException extends NotFoundException {
     super('Track not found');
   }
 }
+
+export class ArtistNotFoundException extends NotFoundException {
+  constructor() {
+    super('Track not found');
+  }
+}
