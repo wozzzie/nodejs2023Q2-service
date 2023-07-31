@@ -1,6 +1,8 @@
+import ALBUMS_DB from 'src/db/albums.db';
 import ARTISTS_DB from 'src/db/artists.db';
 import TRACKS_DB from 'src/db/tracks.db';
 import USERS_DB from 'src/db/users.db';
+import { Album } from 'src/types/albumsInterface';
 import { Artist } from 'src/types/artistsInterface';
 import { Track } from 'src/types/tracksInterface';
 import { User } from 'src/types/usersInterface';
@@ -20,8 +22,14 @@ const deleteAppropriateArtist = (artist: Artist): void => {
   ARTISTS_DB.splice(index, 1);
 };
 
+const deleteAppropriateAlbum = (album: Album): void => {
+  const index = ALBUMS_DB.indexOf(album);
+  ALBUMS_DB.splice(index, 1);
+};
+
 export {
   deleteAppropriateUser,
   deleteAppropriateTrack,
   deleteAppropriateArtist,
+  deleteAppropriateAlbum,
 };
