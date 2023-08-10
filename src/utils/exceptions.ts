@@ -61,7 +61,7 @@ export class ArtistNotCorrespondExeption extends UnprocessableEntityException {
 
 export class ArtistNotFoundException extends NotFoundException {
   constructor() {
-    super('Track not found');
+    super('Artist not found');
   }
 }
 
