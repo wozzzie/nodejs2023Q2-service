@@ -1,33 +1,30 @@
-import ALBUMS_DB from 'src/db/albums.db';
-import { v4 as uuidv4 } from 'uuid';
-import getValidUuid from 'src/utils/checkValidation';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { findAlbum } from 'src/utils/checkAppropriate';
 import { checkAlbumExist } from 'src/utils/checkExist';
 import { CreateAlbumsDto } from './dto/createAlbumsDto.dto';
-import {
-  deleteAppropriateAlbum,
-  deleteAppropriateFav,
-} from 'src/utils/deleteAppropriate';
 import { UpdateAlbumsDto } from './dto/updateAlbumsDto.dto';
 import { Album } from 'src/types/albumsInterface';
-import TRACKS_DB from 'src/db/tracks.db';
-import { Track } from 'src/types/tracksInterface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AlbumEntity } from './entities/album.entity';
 
 @Injectable()
 export class AlbumsService {
-  getAllAlbums(): Album[] {
-    return ALBUMS_DB;
+  constructor(
+    @InjectRepository(AlbumEntity)
+    private albumRepository: Repository<AlbumEntity>,
+  ) {}
+
+  async getAllAlbums(): Promise<Album[]> {
+    return this.albumRepository.find();
   }
 
-  getAlbumById(id: string): Album {
-    getValidUuid(id);
-    const album = findAlbum(id);
+  async getAlbumById(id: string): Promise<Album> {
+    const album = await this.albumRepository.findOneBy({ id });
     checkAlbumExist(album);
     return album;
   }
 
-  createAlbum(createAlbumsDto: CreateAlbumsDto): Album {
+  async createAlbum(createAlbumsDto: CreateAlbumsDto): Promise<Album> {
     const { name, year, artistId } = createAlbumsDto;
 
     if (
@@ -38,20 +35,21 @@ export class AlbumsService {
       throw new BadRequestException('Name, year, artistId are required');
     }
 
-    const newAlbum: Album = {
-      id: uuidv4(),
+    const newAlbum = this.albumRepository.create({
       name,
       year,
       artistId: artistId ?? null,
-    };
+    });
 
-    ALBUMS_DB.push(newAlbum);
+    this.albumRepository.save(newAlbum);
     return newAlbum;
   }
 
-  updateAlbum(id: string, updateAlbumsDto: UpdateAlbumsDto) {
+  async updateAlbum(
+    id: string,
+    updateAlbumsDto: UpdateAlbumsDto,
+  ): Promise<Album> {
     const { name, year, artistId } = updateAlbumsDto;
-    getValidUuid(id);
 
     if (
       (name && year === undefined) ||
@@ -61,27 +59,27 @@ export class AlbumsService {
       throw new BadRequestException('Name, year, artistId are required');
     }
 
-    const album = findAlbum(id);
-    checkAlbumExist(album);
+    const album = await this.getAlbumById(id);
 
     album.name = name;
     album.year = year;
-    album.artistId = artistId ?? null;
+    album.artistId = artistId || null;
+    await this.albumRepository.save(album);
     return album;
   }
 
-  deleteAlbum(id: string): void {
-    getValidUuid(id);
-    const album = findAlbum(id);
-    checkAlbumExist(album);
+  async deleteAlbum(id: string): Promise<void> {
+    const album = await this.getAlbumById(id);
 
-    TRACKS_DB.forEach((track: Track) => {
-      if (track.albumId === id) {
-        track.albumId = null;
-      }
-    });
-    deleteAppropriateAlbum(album);
+    await this.albumRepository.delete(album);
 
-    deleteAppropriateFav('Album', album as Album);
+    // TRACKS_DB.forEach((track: Track) => {
+    //   if (track.albumId === id) {
+    //     track.albumId = null;
+    //   }
+    // });
+    // deleteAppropriateAlbum(album);
+
+    // deleteAppropriateFav('Album', album as Album);
   }
 }
