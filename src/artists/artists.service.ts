@@ -1,30 +1,31 @@
-import { Artist } from '../types/artistsInterface';
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { checkArtistExist } from 'src/utils/checkExist';
-import { CreateArtistDto } from './dto/createArtistDto.dto';
-import { UpdateArtistDto } from './dto/updateArtistDto.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ArtistEntity } from './entities/artist.entity';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { ArtistEntity } from './entities/artist.entity';
+import { UpdateArtistDto } from './dto/updateArtistDto.dto';
+import { CreateArtistDto } from './dto/createArtistDto.dto';
+import { checkArtistExist } from '../utils/checkExist';
+import getValidUuid from '../utils/checkValidation';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class ArtistsService {
+export class ArtistService {
   constructor(
     @InjectRepository(ArtistEntity)
     private artistRepository: Repository<ArtistEntity>,
   ) {}
 
-  async getAllArtists(): Promise<Artist[]> {
+  getAllArtists(): Promise<ArtistEntity[]> {
     return this.artistRepository.find();
   }
 
-  async getArtistById(id: string): Promise<Artist> {
+  async getArtistById(id: string): Promise<ArtistEntity | null> {
+    getValidUuid(id);
     const artist = await this.artistRepository.findOneBy({ id });
     checkArtistExist(artist);
     return artist;
   }
 
-  async createArtist(createArtistDto: CreateArtistDto): Promise<Artist> {
+  async createArtist(createArtistDto: CreateArtistDto): Promise<ArtistEntity> {
     const { name, grammy } = createArtistDto;
 
     if (
@@ -33,59 +34,47 @@ export class ArtistsService {
       grammy === undefined ||
       typeof grammy !== 'boolean'
     ) {
-      throw new BadRequestException('Name and Grammy are required');
+      throw new BadRequestException('Name, grammy are required');
     }
-
     const newArtist = this.artistRepository.create({
       name,
       grammy,
+      isFavorite: false,
     });
-
-    await this.artistRepository.save(newArtist);
-    return newArtist;
+    return await this.artistRepository.save(newArtist);
   }
 
   async updateArtist(
     id: string,
     updateArtistDto: UpdateArtistDto,
-  ): Promise<Artist> {
+  ): Promise<ArtistEntity> {
+    getValidUuid(id);
+
     const { name, grammy } = updateArtistDto;
-
-    const artist = await this.getArtistById(id);
-
     if (
       !name ||
       typeof name !== 'string' ||
       grammy === undefined ||
       typeof grammy !== 'boolean'
     ) {
-      throw new BadRequestException('Name and Grammy are required');
+      throw new BadRequestException('Name, grammy are required');
     }
-
-    artist.name = name;
-    artist.grammy = grammy;
-
-    await this.artistRepository.save(artist);
-    return artist;
+    const artist = await this.artistRepository.findOneBy({
+      id,
+    });
+    checkArtistExist(artist);
+    return await this.artistRepository.save({
+      id,
+      isFavorite: artist.isFavorite,
+      name,
+      grammy,
+    });
   }
 
-  async deleteArtist(id: string): Promise<void> {
-    const artist = await this.getArtistById(id);
-
-    await this.artistRepository.delete(artist);
-
-    // TRACKS_DB.forEach((track: Track) => {
-    //   if (track.artistId === id) {
-    //     track.artistId = null;
-    //   }
-    // });
-
-    // ALBUMS_DB.forEach((album: Album) => {
-    //   if (album.artistId === id) {
-    //     album.artistId = null;
-    //   }
-    // });
-    // deleteAppropriateArtist(artist);
-    // deleteAppropriateFav('Artist', artist as Artist);
+  async deleteArtist(id: string) {
+    getValidUuid(id);
+    const artist = await this.artistRepository.findOneBy({ id });
+    checkArtistExist(artist);
+    return await this.artistRepository.delete(id);
   }
 }
