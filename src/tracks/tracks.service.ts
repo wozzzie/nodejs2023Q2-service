@@ -1,90 +1,62 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Track } from '../types/tracksInterface';
+import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { TrackEntity } from './entities/track.entity';
 import { CreateTrackDto } from './dto/createTrackDto.dto';
 import { UpdateTrackDto } from './dto/updateTrackDto.dto';
-import { checkTrackExist } from 'src/utils/checkExist';
+
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { TrackEntity } from './entities/track.entity';
+import { checkTrackExist } from 'src/utils/checkExist';
 
 @Injectable()
-export class TracksService {
+export class TrackService {
   constructor(
     @InjectRepository(TrackEntity)
     private trackRepository: Repository<TrackEntity>,
   ) {}
 
-  async getAllTracks(): Promise<Track[]> {
+  getAllTracks(): Promise<TrackEntity[]> {
     return this.trackRepository.find();
   }
 
-  async getTrackById(id: string): Promise<Track> {
+  async getTrackById(id: string): Promise<TrackEntity | null> {
     const track = await this.trackRepository.findOneBy({ id });
     checkTrackExist(track);
     return track;
   }
 
-  async createTrack(createTrackDto: CreateTrackDto): Promise<Track> {
-    const { name, artistId, albumId, duration } = createTrackDto;
-
-    if (
-      !name ||
-      typeof name !== 'string' ||
-      (artistId !== null && typeof artistId !== 'string') ||
-      (albumId !== null && typeof albumId !== 'string') ||
-      typeof duration !== 'number'
-    ) {
-      throw new BadRequestException(
-        'Name, artistId, albumId, and duration are required and must be of the correct type',
-      );
-    }
+  async createTrack(createTrackDto: CreateTrackDto) {
+    const { name, duration } = createTrackDto;
 
     const newTrack = this.trackRepository.create({
       name,
-      artistId: artistId ?? null,
-      albumId: albumId ?? null,
       duration,
+      isFavorite: false,
     });
 
-    await this.trackRepository.save(newTrack);
-    return newTrack;
+    return await this.trackRepository.save(newTrack);
   }
 
-  async updateTrack(
-    id: string,
-    updateTrackDto: UpdateTrackDto,
-  ): Promise<Track> {
-    const { name, artistId, albumId, duration } = updateTrackDto;
+  async updateTrack(id: string, updateTrackDto: UpdateTrackDto) {
+    const { name, duration } = updateTrackDto;
+    const track = await this.trackRepository.findOneBy({
+      id,
+    });
 
-    if (
-      !name ||
-      typeof name !== 'string' ||
-      (artistId !== null &&
-        typeof artistId !== 'string' &&
-        typeof artistId !== 'undefined') ||
-      (albumId !== null &&
-        typeof albumId !== 'string' &&
-        typeof albumId !== 'undefined') ||
-      typeof duration !== 'number'
-    ) {
-      throw new BadRequestException(
-        'Name, artistId, albumId, and duration are required and must be of the correct type',
-      );
-    }
-
-    const track = await this.getTrackById(id);
-
-    track.name = name;
-    track.artistId = artistId ?? null;
-    track.albumId = albumId ?? null;
-    track.duration = duration;
-
-    await this.trackRepository.save(track);
-    return track;
+    checkTrackExist(track);
+    return await this.trackRepository.save({
+      id,
+      isFavorite: track.isFavorite,
+      name,
+      duration,
+    });
   }
 
-  async deleteTrack(id: string): Promise<void> {
-    const track = await this.getTrackById(id);
-    await this.trackRepository.delete(track);
+  async deleteTrack(id: string) {
+    const track = await this.trackRepository.findOneBy({
+      id,
+    });
+    checkTrackExist(track);
+
+    await this.trackRepository.delete(id);
   }
 }
