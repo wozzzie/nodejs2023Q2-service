@@ -8,5 +8,5 @@ export class UpdateAlbumsDto {
   year: number;
 
   @ApiProperty()
-  artistId: string;
+  artistId: string | null;
 }

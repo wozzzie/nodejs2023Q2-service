@@ -29,9 +29,9 @@ export class UserNotFoundException extends NotFoundException {
   }
 }
 
-export class InvalidUserIdException extends BadRequestException {
+export class InvalidIdException extends BadRequestException {
   constructor() {
-    super('Invalid userId');
+    super('Invalid id');
   }
 }
 
