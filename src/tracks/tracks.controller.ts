@@ -8,17 +8,20 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { TracksService } from './tracks.service';
+import { TrackService } from './tracks.service';
 import { Track } from '../types/tracksInterface';
 import { CreateTrackDto } from './dto/createTrackDto.dto';
 import { UpdateTrackDto } from './dto/updateTrackDto.dto';
+import getValidUuid from 'src/utils/checkValidation';
+import { checkTrackExist } from 'src/utils/checkExist';
 
 @ApiTags('Tracks')
 @Controller('track')
 export class TracksController {
-  constructor(private readonly tracksService: TracksService) {}
+  constructor(private readonly tracksService: TrackService) {}
 
   @Get()
   @ApiResponse({ status: HttpStatus.OK })
@@ -30,7 +33,11 @@ export class TracksController {
   @ApiResponse({ status: HttpStatus.OK })
   @ApiParam({ name: 'trackId', type: String })
   async getTrackById(@Param('trackId') trackId: string): Promise<Track> {
-    const track = this.tracksService.getTrackById(trackId);
+    getValidUuid(trackId);
+
+    const track = await this.tracksService.getTrackById(trackId);
+
+    checkTrackExist(track);
     return track;
   }
 
@@ -38,6 +45,18 @@ export class TracksController {
   @HttpCode(HttpStatus.CREATED)
   @ApiResponse({ status: HttpStatus.CREATED })
   async createTrack(@Body() createTrackDto: CreateTrackDto): Promise<Track> {
+    const { name, artistId, albumId, duration } = createTrackDto;
+    if (
+      !name ||
+      typeof name !== 'string' ||
+      (artistId !== null && typeof artistId !== 'string') ||
+      (albumId !== null && typeof albumId !== 'string') ||
+      typeof duration !== 'number'
+    ) {
+      throw new BadRequestException(
+        'Name, artistId, albumId, and duration are required and must be of the correct type',
+      );
+    }
     const createdTrack = this.tracksService.createTrack(createTrackDto);
     return createdTrack;
   }
@@ -49,6 +68,28 @@ export class TracksController {
     @Param('trackId') trackId: string,
     @Body() updateTrackDto: UpdateTrackDto,
   ): Promise<Track> {
+    getValidUuid(trackId);
+
+    const { name, artistId, albumId, duration } = updateTrackDto;
+
+    const track = await this.tracksService.getTrackById(trackId);
+    checkTrackExist(track);
+
+    if (
+      !name ||
+      typeof name !== 'string' ||
+      (artistId !== null &&
+        typeof artistId !== 'string' &&
+        typeof artistId !== 'undefined') ||
+      (albumId !== null &&
+        typeof albumId !== 'string' &&
+        typeof albumId !== 'undefined') ||
+      typeof duration !== 'number'
+    ) {
+      throw new BadRequestException(
+        'Name, artistId, albumId, and duration are required and must be of the correct type',
+      );
+    }
     const updatedTrack = this.tracksService.updateTrack(
       trackId,
       updateTrackDto,
@@ -60,6 +101,10 @@ export class TracksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiParam({ name: 'trackId', type: String })
   async deleteTrack(@Param('trackId') trackId: string): Promise<void> {
+    getValidUuid(trackId);
+
+    const track = await this.tracksService.getTrackById(trackId);
+    checkTrackExist(track);
     this.tracksService.deleteTrack(trackId);
   }
 }

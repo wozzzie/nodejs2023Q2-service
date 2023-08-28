@@ -11,8 +11,10 @@ import {
 import { Track } from 'src/types/tracksInterface';
 import { Artist } from 'src/types/artistsInterface';
 import { Album } from 'src/types/albumsInterface';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { AlbumEntity } from 'src/albums/entities/album.entity';
 
-const checkUserExist = (user?: User): void => {
+const checkUserExist = (user?: UserEntity): void => {
   if (!user) {
     throw new UserNotFoundException();
   }
@@ -48,7 +50,7 @@ const checkArtistExist = (artist?: Artist): void => {
   }
 };
 
-const checkAlbumExist = (album?: Album): void => {
+const checkAlbumExist = (album?: AlbumEntity): void => {
   if (!album) {
     throw new AlbumNotFoundException();
   }

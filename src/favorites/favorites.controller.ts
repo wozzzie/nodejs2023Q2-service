@@ -1,70 +1,96 @@
 import {
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
-  Delete,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { FavoritesService } from './favorites.service';
-import { FavoritesResponse } from 'src/types/favoritesInterface';
+import { TrackService } from '../tracks/tracks.service';
+import { AlbumService } from '../albums/albums.service';
+import { ArtistService } from '../artists/artists.service';
+import { StatusCodes } from 'http-status-codes';
+import getValidUuid from 'src/utils/checkValidation';
 
-@ApiTags('Favorites')
 @Controller('favs')
 export class FavoritesController {
-  constructor(private readonly favsService: FavoritesService) {}
+  constructor(private readonly favoritesService: FavoritesService) {}
 
   @Get()
-  @ApiResponse({ status: HttpStatus.OK })
-  async getAllFavorites(): Promise<FavoritesResponse> {
-    return this.favsService.getAllFavs();
+  findAllFavorites() {
+    return this.favoritesService.findAllFavorites();
   }
 
-  @Post('/track/:trackId')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiParam({ name: 'trackId', type: String })
-  async addTrackToFavorites(@Param('trackId') trackId: string): Promise<void> {
-    this.favsService.addFavTrack(trackId);
+  @Post('track/:id')
+  async addTrackToFavorites(@Param('id') id: string) {
+    getValidUuid(id);
+
+    const track = await this.favoritesService.addTrackToFavorites(id);
+    if (!track) {
+      throw new HttpException(
+        'Unprocessable entity',
+        StatusCodes.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    return track;
   }
 
-  @Delete('/track/:trackId')
+  @Delete('track/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiParam({ name: 'trackId', type: String })
-  async deleteFavoriteTrack(@Param('trackId') trackId: string): Promise<void> {
-    this.favsService.deleteFavTrack(trackId);
+  async deleteFavoriteTrack(@Param('id') id: string) {
+    getValidUuid(id);
+    const track = await this.favoritesService.deleteTrackFromFavorites(id);
+    return track;
   }
 
-  @Post('/album/:albumId')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiParam({ name: 'albumId', type: String })
-  async addAlbumToFavorites(@Param('albumId') albumId: string): Promise<void> {
-    this.favsService.addFavAlbum(albumId);
+  @Post('album/:id')
+  async addAlbumToFavorites(@Param('id') id: string) {
+    getValidUuid(id);
+
+    const album = await this.favoritesService.addAlbumToFavorites(id);
+    if (!album) {
+      throw new HttpException(
+        'Unprocessable entity',
+        StatusCodes.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    return album;
   }
 
-  @Delete('/album/:albumId')
+  @Delete('album/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiParam({ name: 'albumId', type: String })
-  async deleteFavoriteAlbum(@Param('albumId') albumId: string): Promise<void> {
-    this.favsService.deleteFavAlbum(albumId);
+  async deleteFavoriteAlbum(@Param('id') id: string) {
+    getValidUuid(id);
+    const album = await this.favoritesService.deleteAlbumFromFavorites(id);
+    return album;
   }
 
-  @Post('/artist/:artistId')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiParam({ name: 'artistId', type: String })
-  async addArtistToFavorites(
-    @Param('artistId') artistId: string,
-  ): Promise<void> {
-    this.favsService.addFavArtist(artistId);
+  @Post('artist/:id')
+  async addArtistToFavorites(@Param('id') id: string) {
+    getValidUuid(id);
+
+    const artist = await this.favoritesService.addArtistToFavorites(id);
+    if (!artist) {
+      throw new HttpException(
+        'Unprocessable entity',
+        StatusCodes.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    return artist;
   }
 
-  @Delete('/artist/:artistId')
+  @Delete('artist/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiParam({ name: 'artistId', type: String })
-  async deleteFavoriteArtist(
-    @Param('artistId') artistId: string,
-  ): Promise<void> {
-    this.favsService.deleteFavArtist(artistId);
+  async deleteFavoriteArtist(@Param('id') id: string) {
+    getValidUuid(id);
+
+    const artist = await this.favoritesService.deleteArtistFromFavorites(id);
+    return artist;
   }
 }

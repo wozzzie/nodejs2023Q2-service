@@ -1,31 +1,30 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Track } from '../types/tracksInterface';
-import TRACKS_DB from 'src/db/tracks.db';
 import { CreateTrackDto } from './dto/createTrackDto.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdateTrackDto } from './dto/updateTrackDto.dto';
-import getValidUuid from 'src/utils/checkValidation';
 import { checkTrackExist } from 'src/utils/checkExist';
-import { findTrack } from 'src/utils/checkAppropriate';
-import {
-  deleteAppropriateFav,
-  deleteAppropriateTrack,
-} from 'src/utils/deleteAppropriate';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TrackEntity } from './entities/track.entity';
 
 @Injectable()
 export class TracksService {
-  getAllTracks(): Track[] {
-    return TRACKS_DB;
+  constructor(
+    @InjectRepository(TrackEntity)
+    private trackRepository: Repository<TrackEntity>,
+  ) {}
+
+  async getAllTracks(): Promise<Track[]> {
+    return this.trackRepository.find();
   }
 
-  getTrackById(id: string): Track {
-    getValidUuid(id);
-    const track = findTrack(id);
+  async getTrackById(id: string): Promise<Track> {
+    const track = await this.trackRepository.findOneBy({ id });
     checkTrackExist(track);
     return track;
   }
 
-  createTrack(createTrackDto: CreateTrackDto): Track {
+  async createTrack(createTrackDto: CreateTrackDto): Promise<Track> {
     const { name, artistId, albumId, duration } = createTrackDto;
 
     if (
@@ -40,22 +39,22 @@ export class TracksService {
       );
     }
 
-    const newTrack: Track = {
-      id: uuidv4(),
+    const newTrack = this.trackRepository.create({
       name,
       artistId: artistId ?? null,
       albumId: albumId ?? null,
       duration,
-    };
+    });
 
-    TRACKS_DB.push(newTrack);
+    await this.trackRepository.save(newTrack);
     return newTrack;
   }
 
-  updateTrack(id: string, updateTrackDto: UpdateTrackDto): Track {
+  async updateTrack(
+    id: string,
+    updateTrackDto: UpdateTrackDto,
+  ): Promise<Track> {
     const { name, artistId, albumId, duration } = updateTrackDto;
-
-    getValidUuid(id);
 
     if (
       !name ||
@@ -73,21 +72,19 @@ export class TracksService {
       );
     }
 
-    const track = findTrack(id);
-    checkTrackExist(track);
+    const track = await this.getTrackById(id);
 
     track.name = name;
     track.artistId = artistId ?? null;
     track.albumId = albumId ?? null;
     track.duration = duration;
-    return { ...track };
+
+    await this.trackRepository.save(track);
+    return track;
   }
 
-  deleteTrack(id: string): void {
-    getValidUuid(id);
-    const track = findTrack(id);
-    checkTrackExist(track);
-    deleteAppropriateTrack(track);
-    deleteAppropriateFav('Track', track as Track);
+  async deleteTrack(id: string): Promise<void> {
+    const track = await this.getTrackById(id);
+    await this.trackRepository.delete(track);
   }
 }

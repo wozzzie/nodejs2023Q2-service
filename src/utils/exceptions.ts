@@ -29,9 +29,9 @@ export class UserNotFoundException extends NotFoundException {
   }
 }
 
-export class InvalidUserIdException extends BadRequestException {
+export class InvalidIdException extends BadRequestException {
   constructor() {
-    super('Invalid userId');
+    super('Invalid id');
   }
 }
 
@@ -61,7 +61,7 @@ export class ArtistNotCorrespondExeption extends UnprocessableEntityException {
 
 export class ArtistNotFoundException extends NotFoundException {
   constructor() {
-    super('Track not found');
+    super('Artist not found');
   }
 }
 
